@@ -3,6 +3,7 @@
   <head>
     <title>backlight</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Set a custom background color in your browser with this simple tool." />
     <style>
       * {
         margin: 0;
@@ -122,7 +123,7 @@
       input {
         background-color: rgba(255, 255, 255, 0.1);
         flex: 1;
-        padding: 0 1rem;
+        padding-left: 1rem;
 
         width: 0;
       }
@@ -202,10 +203,49 @@
         setError(false);
       }
 
-      function setColorString(colorString) {
+      function colorArrayToHash(colorArray) {
+        colorArray = colorArray.slice(0, 3);
+        
+        return colorArray.join(":");
+      }
+
+      function colorArrayFromHash(hash) {
+        let colorArray = hash.split(/:/g);
+        
+        if (colorArray.length !== 3) {
+          return null;
+        }
+
+        try {
+          return colorArray.map(s => parseInt(s));
+        } catch (err) {
+          return null;
+        }
+      }
+
+      function setColorString(colorString, saveHistory) {
+        if (saveHistory === undefined) {
+          saveHistory = true;
+        }
+        
         const colorArray = parseCssColor(colorString);
         setColor(colorArray);
+        
+        if (saveHistory) {
+          history.pushState(null, null, "#" + colorArrayToHash(colorArray));
+        }
+        
         document.getElementById("color-input").value = colorString;
+      }
+
+      function restoreFromHash() {
+        const colorArray = colorArrayFromHash(location.hash.slice(1));
+
+        if (!colorArray) {
+          return;
+        }
+
+        setColorString(`rgb(${colorArray.join(", ")})`);
       }
 
       function setColor(colorArray) {
@@ -254,5 +294,10 @@
         </button>
       </form>
     </main>
+    <script>
+      if (location.hash) {
+        restoreFromHash();
+      }
+    </script>
   </body>
 </html>
