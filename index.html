@@ -1,0 +1,258 @@
+<!doctype html>
+<html>
+  <head>
+    <title>backlight</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        
+        color: inherit;
+        font-size: inherit;
+        font-family: inherit;
+        font-weight: inherit;
+
+        border: none;
+        outline: none;
+        box-shadow: none;
+        background: none;
+
+        box-sizing: border-box;
+      }
+
+      html, body {
+        height: 100%;
+        width: 100%;
+
+        overflow: hidden;
+      }
+
+      html {
+        font-family: -apple-system, BlinkMacSystemFont, avenir next, avenir, segoe ui, helvetica neue, helvetica, Ubuntu, roboto, noto, arial, sans-serif;
+      }
+
+      #controls {
+        background-color: rgba(0, 0, 0, 0.9);
+        color: #fff;
+
+        position: absolute;
+        top: 0;
+        left: 1rem;
+        width: 30rem;
+
+        border-radius: 0 0 1rem 1rem;
+
+        display: flex;
+        flex-direction: column;
+
+        transition: opacity 0.5s ease, transform 0.5s ease;
+        transition-timing-function: cubic-bezier(.06,.98,.52,1);
+      }
+
+      body.hidden #controls {
+        pointer-events: none;
+        transform: translateY(-5rem);
+        opacity: 0;
+        transition-timing-function: cubic-bezier(.86,-0.01,.56,.64);
+      }
+
+      body.hidden {
+        cursor: none;
+      }
+
+      @media only screen and (max-width: 50rem) {
+        #controls {
+          left: 0;
+          width: 100%;
+
+          border-radius: 0;
+        }
+      }
+
+      #header {
+        margin: 1rem 2rem;
+        margin-bottom: 0.5rem;
+
+        display: flex;
+        align-self: stretch;
+      }
+
+      #header-icon {
+        color: rgba(255, 255, 255, 0.3);
+        transition: color 2s ease;
+      }
+
+      #repo-link {
+        display: block;
+        margin-left: auto;
+        color: rgba(255, 255, 255, 0.3)
+      }
+
+      section {
+        margin: 0 2rem;
+        
+        color: rgba(255, 255, 255, 0.5);
+        line-height: 175%;
+      }
+
+      #input-row {
+        margin: 1rem 1rem;
+        
+        font-family: Menlo, Consolas, Monaco, Liberation Mono, Lucida Console, monospace;
+        font-size: 150%;
+        border-radius: 0.5rem;
+        overflow: hidden;
+
+        display: flex;
+        align-items: stretch;
+
+        border: 2px solid rgba(255, 255, 255, 0.2);
+        padding: 1px;
+      }
+
+      #input-row:focus-within {
+        border-color: #fff;
+      }
+
+      #input-row.error {
+        border-color: #f42;
+      }
+
+      input {
+        background-color: rgba(255, 255, 255, 0.1);
+        flex: 1;
+        padding: 0 1rem;
+
+        width: 0;
+      }
+      
+      input:focus {
+        background-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      button {
+        width: 3rem;
+        height: 3rem;
+        background-color: rgba(255, 255, 255, 0.2);
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        border-radius: calc(0.5rem - 1px - 2px);
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+      }
+
+      .icon {
+        width: 24px;
+        height: 24px;
+      }
+
+      #color {
+        position: absolute;
+        
+        width: 100%;
+        height: 100%;
+        background-color: #38f;
+
+        transition: background-color 0.5s ease-in-out;
+      }
+      
+    </style>
+    <script>
+      function parseCssColor(str) {
+        const div = document.createElement("div");
+        document.body.appendChild(div);
+        div.style.color = "rgba(0, 0, 0, 0.5)";
+        div.style.color = str;
+
+        const res = getComputedStyle(div).color.match(/[\.\d]+/g).map(Number);
+        div.remove();
+
+        if (res[3] === 0.5) {
+          throw new Error("bad color");
+        }
+        
+        return res;
+      }
+
+      function setError(show) {
+        const inputRow = document.getElementById("input-row");
+
+        if (show) {
+          inputRow.classList.add("error");
+        } else {
+          inputRow.classList.remove("error");
+        }
+      }
+
+      function applyColor() {
+        const colorString = document.getElementById("color-input").value;
+
+        try {
+          setColorString(colorString);
+        } catch (err) {
+          console.error(err);
+          setError(true);
+          return;
+        }
+
+        setError(false);
+      }
+
+      function setColorString(colorString) {
+        const colorArray = parseCssColor(colorString);
+        setColor(colorArray);
+        document.getElementById("color-input").value = colorString;
+      }
+
+      function setColor(colorArray) {
+        document.getElementById("color").style.cssText = `background-color: rgb(${colorArray.join(", ")})`;
+      }
+
+      function toggleControls() {
+        document.body.classList.toggle("hidden");
+      }
+    </script>
+  </head>
+  <body>
+    <div id="color" onclick="toggleControls()">
+    </div>
+    <main id="controls">
+      <header id="header">
+        <a id="header-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+          </svg>
+        </a>
+        <a href="https://github.com/ForestKatsch/backlight" id="repo-link" >
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </a>
+        <script>
+          setTimeout(() => {
+            const color = `hsl(${Math.floor(Math.random() * 360)}, 60%, 70%)`;
+            document.getElementById("header-icon").style.color = color;
+            document.getElementById("header-icon").onclick = () => {
+              setColorString(color);
+            };
+          }, 1000);
+        </script>
+      </header>
+      <section class="instructions">
+        <p>click or tap on the background to toggle this box</p>
+      </section>
+      <form id="input-row" onsubmit="event.preventDefault(); applyColor()">
+        <input placeholder="#38f" autofocus width="0" id="color-input" />
+        <button>
+          <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+          </svg>
+        </button>
+      </form>
+    </main>
+  </body>
+</html>
