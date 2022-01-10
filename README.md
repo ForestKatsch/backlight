@@ -6,7 +6,7 @@ Set a custom background color in your browser with this simple tool.
 
 MIT License
 
-Copyright (c) 2022 Forest Katsch
+Copyright (c) 2022 Forest Katsch, Refactoring UI Inc.
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
